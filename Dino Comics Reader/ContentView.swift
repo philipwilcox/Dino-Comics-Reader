@@ -24,7 +24,7 @@ struct ContentView: View {
             Text("Something New")
                 .font(.title)
             let url = URL(string: "https://www.qwantz.com")!
-            WebViewWrapper(url: url,
+            WebView(url: url,
             secretTextFetcher: {
                 text1, text2, text3 in
                 secret1 = text1
