@@ -1,90 +1,53 @@
-//
-//  WebView.swift
-//  Dino Comics Reader
-//
-//  Created by Philip Wilcox on 6/22/23.
-//
-
-import Foundation
-
 import SwiftUI
 import WebKit
 import SwiftSoup
 
-// See https://sarunw.com/posts/swiftui-webview/
-// And https://developer.apple.com/documentation/swiftui/uiviewrepresentable
 struct WebView: UIViewRepresentable {
-    // 1
     let url: URL
-    
-    let webView: WKWebView = WKWebView()
     
     let secretTextFetcher: (String, String, String) -> Void
     
-    let navDelegate: MyWKDelegate = MyWKDelegate()
-
-
-    // 2
     func makeUIView(context: Context) -> WKWebView {
+        let webView = WKWebView()
         webView.customUserAgent = "PW Annotator"
-        webView.navigationDelegate = navDelegate
-        navDelegate.setCallback(callback: secretTextFetcher)
-        return webView
-    }
-
-    // 3
-    func updateUIView(_ webView: WKWebView, context: Context) {
-
+        webView.navigationDelegate = context.coordinator
         let request = URLRequest(url: url)
         webView.load(request)
+        return webView
     }
     
-    // see https://stackoverflow.com/a/68671543
-    class MyWKDelegate: NSObject, WKNavigationDelegate{
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        // TODO: this update is called again after the text is applied at the outer layer I guess cause of reflow?
+        // TODO: investigate if there's a graceful improvement, or if it's just totally unecessary
+//        let request = URLRequest(url: url)
+//        uiView.load(request)
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(secretTextFetcher: secretTextFetcher)
+    }
+    
+    class Coordinator: NSObject, WKNavigationDelegate {
+        let secretTextFetcher: (String, String, String) -> Void
         
-        var secretTextFetcher: ((String, String, String) -> Void)?
-        
-        override init() {
+        init(secretTextFetcher: @escaping (String, String, String) -> Void) {
+            self.secretTextFetcher = secretTextFetcher
         }
         
-        func setCallback(callback: @escaping (String, String, String) -> Void) {
-            secretTextFetcher = callback
-        }
-
+        
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            print("End loading")
-            webView.evaluateJavaScript("document.body.innerHTML", completionHandler: { result, error in
-                
-                if let html = result as? String {
+            webView.evaluateJavaScript("document.documentElement.outerHTML.toString()") { html, error in
+                if let html = html as? String {
                     // TODO: improve all this hideous error handling
                     let doc: Document = try! SwiftSoup.parse(html)
-                    
+
                     let comic = try! doc.select("img.comic").first()!
                     let alt1 = try! comic.attr("title")
-                    
-                    self.secretTextFetcher!(alt1, "THIS", "COOL")
-//                        print(html)
+
+                    self.secretTextFetcher(alt1, "THIS", "COOL")
                     }
-                })
-        }
-        
-        // TODO: consolidate this didFinish/didCommit stuff?
-        func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-            print("End loading")
-            webView.evaluateJavaScript("document.body.innerHTML", completionHandler: { result, error in
-                
-                if let html = result as? String {
-                    // TODO: improve all this hideous error handling
-                    let doc: Document = try! SwiftSoup.parse(html)
-                    
-                    let comic = try! doc.select("img.comic").first()!
-                    let alt1 = try! comic.attr("title")
-                    
-                    self.secretTextFetcher!(alt1, "THIS", "COOL")
-//                        print(html)
-                    }
-                })
+//                    print("LOADED")
+            }
         }
     }
-
 }
