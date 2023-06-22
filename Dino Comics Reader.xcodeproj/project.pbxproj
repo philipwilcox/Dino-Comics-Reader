@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E909C08A2A44E66800E0EB9F /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E909C0892A44E66800E0EB9F /* WebView.swift */; };
+		E9DA54782A44F2BA00009008 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = E9DA54772A44F2BA00009008 /* SwiftSoup */; };
 		E9E98C912A4366BE00DE72AD /* Dino_Comics_ReaderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E98C902A4366BE00DE72AD /* Dino_Comics_ReaderApp.swift */; };
 		E9E98C932A4366BE00DE72AD /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E98C922A4366BE00DE72AD /* Persistence.swift */; };
 		E9E98C962A4366BE00DE72AD /* Dino_Comics_Reader.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E9E98C942A4366BE00DE72AD /* Dino_Comics_Reader.xcdatamodeld */; };
@@ -36,6 +38,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E909C0892A44E66800E0EB9F /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		E9E98C8D2A4366BE00DE72AD /* Dino Comics Reader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Dino Comics Reader.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9E98C902A4366BE00DE72AD /* Dino_Comics_ReaderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dino_Comics_ReaderApp.swift; sourceTree = "<group>"; };
 		E9E98C922A4366BE00DE72AD /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
@@ -56,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E9DA54782A44F2BA00009008 /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -106,6 +110,7 @@
 				E9E98C9B2A4366C000DE72AD /* Dino_Comics_Reader.entitlements */,
 				E9E98C942A4366BE00DE72AD /* Dino_Comics_Reader.xcdatamodeld */,
 				E9E98C9C2A4366C000DE72AD /* Preview Content */,
+				E909C0892A44E66800E0EB9F /* WebView.swift */,
 			);
 			path = "Dino Comics Reader";
 			sourceTree = "<group>";
@@ -151,6 +156,9 @@
 			dependencies = (
 			);
 			name = "Dino Comics Reader";
+			packageProductDependencies = (
+				E9DA54772A44F2BA00009008 /* SwiftSoup */,
+			);
 			productName = "Dino Comics Reader";
 			productReference = E9E98C8D2A4366BE00DE72AD /* Dino Comics Reader.app */;
 			productType = "com.apple.product-type.application";
@@ -223,6 +231,9 @@
 				Base,
 			);
 			mainGroup = E9E98C842A4366BE00DE72AD;
+			packageReferences = (
+				E9DA54762A44F2BA00009008 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+			);
 			productRefGroup = E9E98C8E2A4366BE00DE72AD /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -266,6 +277,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E9E98C912A4366BE00DE72AD /* Dino_Comics_ReaderApp.swift in Sources */,
+				E909C08A2A44E66800E0EB9F /* WebView.swift in Sources */,
 				E9E98C962A4366BE00DE72AD /* Dino_Comics_Reader.xcdatamodeld in Sources */,
 				E9E98C982A4366BE00DE72AD /* ContentView.swift in Sources */,
 				E9E98C932A4366BE00DE72AD /* Persistence.swift in Sources */,
@@ -420,6 +432,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Dino Comics Reader/Dino_Comics_Reader.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Dino Comics Reader/Preview Content\"";
@@ -443,10 +456,12 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.philipwilcox.Dino-Comics-Reader";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,3";
 			};
 			name = Debug;
 		};
@@ -456,6 +471,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Dino Comics Reader/Dino_Comics_Reader.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Dino Comics Reader/Preview Content\"";
@@ -479,10 +495,12 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.philipwilcox.Dino-Comics-Reader";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,3";
 			};
 			name = Release;
 		};
@@ -612,6 +630,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E9DA54762A44F2BA00009008 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E9DA54772A44F2BA00009008 /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E9DA54762A44F2BA00009008 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		E9E98C942A4366BE00DE72AD /* Dino_Comics_Reader.xcdatamodeld */ = {
