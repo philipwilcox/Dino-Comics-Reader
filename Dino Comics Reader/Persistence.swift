@@ -10,22 +10,22 @@ import CoreData
 struct PersistenceController {
     static let shared = PersistenceController()
 
-    // TODO: do I need any of this or was it just boilerplate for the example?
     static var preview: PersistenceController = {
+        // TODO: set up some mock comics data for preview?
         let result = PersistenceController(inMemory: true)
-        let viewContext = result.container.viewContext
-        for _ in 0..<10 {
-            let newItem = ComicIdHistory(context: viewContext)
-            newItem.timestamp = Date()
-        }
-        do {
-            try viewContext.save()
-        } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-        }
+//        let viewContext = result.container.viewContext
+//        for _ in 0..<10 {
+//            let newItem = ComicIdHistory(context: viewContext)
+//            newItem.timestamp = Date()
+//        }
+//        do {
+//            try viewContext.save()
+//        } catch {
+//            // Replace this implementation with code to handle the error appropriately.
+//            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+//            let nsError = error as NSError
+//            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+//        }
         return result
     }()
 
