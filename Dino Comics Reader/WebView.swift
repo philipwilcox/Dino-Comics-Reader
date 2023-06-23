@@ -7,7 +7,7 @@ struct WebView: UIViewRepresentable {
     
     let secretTextFetcher: (String, String, String) -> Void
     let comicIdFetcher: (Int) -> Void
-    
+        
     func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
         webView.customUserAgent = "PW Annotator"
@@ -16,9 +16,14 @@ struct WebView: UIViewRepresentable {
     }
     
     func updateUIView(_ webView: WKWebView, context: Context) {
-//        print("In update!")
-        let request = URLRequest(url: URL(string: urlString)!)
-        webView.load(request)
+        // "Debounce" so that if the url didn't change we don't refresh so that when we update the alt text state we don't reload the page and create an uncessary page view
+        // Note that we store the state in the Coordinator since we can't track state (or mutate it) here
+//        print("Should I do update? urlString \(urlString) vs \(context.coordinator.lastUrl)")
+        if (urlString != context.coordinator.lastUrl) {
+            let request = URLRequest(url: URL(string: urlString)!)
+            webView.load(request)
+        }
+        context.coordinator.lastUrl = urlString
     }
     
     func makeCoordinator() -> Coordinator {
@@ -28,13 +33,21 @@ struct WebView: UIViewRepresentable {
     class Coordinator: NSObject, WKNavigationDelegate {
         let secretTextFetcher: (String, String, String) -> Void
         let comicIdFetcher: (Int) -> Void
+        var lastUrl: String
         
         init(secretTextFetcher: @escaping (String, String, String) -> Void, comicIdFetcher: @escaping (Int) -> Void) {
             self.secretTextFetcher = secretTextFetcher
             self.comicIdFetcher = comicIdFetcher
+            self.lastUrl = ""
         }
         
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            // Update both the url ID and texts in the same didFinish, vs updating URL when we start navigating, to minimize state changes
+            if let url = webView.url {
+                self.lastUrl = url.absoluteString
+                let comicId = Int(URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems?.first(where: { $0.name == "comic" })!.value ?? "1")!
+                self.comicIdFetcher(comicId)
+            }
             webView.evaluateJavaScript("document.documentElement.outerHTML.toString()") { html, error in
                 if let html = html as? String {
                     // TODO: improve all this hideous error handling
@@ -50,13 +63,6 @@ struct WebView: UIViewRepresentable {
                     
                     self.secretTextFetcher(alt1, alt2, alt3)
                     }
-            }
-        }
-        
-        func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-            if let url = webView.url {
-                let comicId = Int(URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems?.first(where: { $0.name == "comic" })!.value ?? "1")!
-                self.comicIdFetcher(comicId)
             }
         }
     }

@@ -12,12 +12,6 @@ struct ComicIdFieldView: View {
     @Binding var comicId: Int
     let completionCallback: (Int) -> Void
     
-    
-//    init(initialId: Binding<Int>, completionCallback: @escaping (Int) -> Void) {
-//        self.completionCallback = completionCallback
-//        _comicId = Binding(initialvalue: initialId)
-//    }
-    
     var body : some View {
         TextField("Comic", value: $comicId, formatter: NumberFormatter())
             .keyboardType(.numberPad).onSubmit {
@@ -40,15 +34,6 @@ struct ContentView: View {
     @State var secret3 = ""
     @State var comicId = 1
     @State var urlString = ""
-    
-    init() {
-        print("in init")
-        // TODO: why is it complaining about this one
-        _comicId = State(initialValue:  items.isEmpty ? 2487 : items.first!.value(forKey: "id")! as! Int)
-        _urlString = State(initialValue: "https://qwantz.com/index.php?comic=\(comicId)")
-        print("done with init")
-    }
-    
     
     
     var body: some View {
@@ -102,7 +87,13 @@ struct ContentView: View {
                 Text(secret2).font(.caption2).foregroundColor(Color(red: 1, green: 0.7, blue: 0))
                 Text(secret3).font(.caption).foregroundColor(Color(red: 0.7, green: 0.4, blue: 0))
             }
-        }
+        }.onAppear(perform: {
+            // TODO: move this to a named method for readability
+            comicId = items.isEmpty ? 2487 : items.first!.value(forKey: "id")! as! Int
+            print(comicId)
+            urlString =  "https://qwantz.com/index.php?comic=\(comicId)"
+            print("done with onAppear")
+        })
     }
 }
 
