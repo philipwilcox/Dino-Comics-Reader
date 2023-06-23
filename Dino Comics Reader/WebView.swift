@@ -15,6 +15,8 @@ struct WebView: UIViewRepresentable {
         return webView
     }
     
+    // TODO: reject links that aren't to other comics
+    
     func updateUIView(_ webView: WKWebView, context: Context) {
         // "Debounce" so that if the url didn't change we don't refresh so that when we update the alt text state we don't reload the page and create an uncessary page view
         // Note that we store the state in the Coordinator since we can't track state (or mutate it) here
