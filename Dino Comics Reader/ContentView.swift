@@ -69,7 +69,8 @@ struct ContentView: View {
                     // TODO: disable if items has less than length 2
                     let lastItem = backItems[0]
                     let lastId = lastItem.value(forKey: "id")
-//                    print("last item id is \(String(describing: lastId)) vs comic ID which is \(comicId)")
+                    print("last item id is \(String(describing: lastId)) vs comic ID which is \(comicId)")
+                    // TODO: currently a "back/forward/back" sequence is crashing on this assertion
                     assert(lastItem.value(forKey: "id") as! Int == comicId)
                     let nextItem = backItems[1]
 //                    print("Got last two items from back history: \(String(describing: lastItem.value(forKey: "id"))), \(String(describing: nextItem.value(forKey: "id")))")
@@ -81,7 +82,7 @@ struct ContentView: View {
                     // TODO: make a helper for updating these two state vars? or make urlstring computed again?
                     comicId = nextItem.value(forKey: "id") as! Int
                     urlString = "https://qwantz.com/index.php?comic=\(comicId)"
-//                    print("Will go back to \(urlString)")
+                    print("Will go back to \(urlString), comicId now = \(comicId)")
 //                    print("Added forward item for \(String(describing: forwardItem.value(forKey: "id")))")
                     
                 }, label: { Text("Back") })
@@ -90,15 +91,18 @@ struct ContentView: View {
                     let lastItem = backItems[0]
                     let lastId = lastItem.value(forKey: "id")
                     assert(lastId as! Int == comicId)
-                    // Since current item is already on the back stack we don't need to add a new record there; when the pageload happens the new page we forward to will land there too
                     let nextItem = forwardItems[0]
                     let nextId = nextItem.value(forKey: "id") as! Int
                     viewContext.delete(nextItem)
-                    try? viewContext.save()
                     // TODO: make a helper for updating these two state vars? or make urlstring computed again?
                     comicId = nextId
+                    // we need to add a new back record since we're updating comicId, we rely on "top of back stack" = "current comic ID" assumption elsewhere
+                    // TODO: clean this assumption up, make better state management controls for this...
+                    let backItem = ComicIdHistory(context: viewContext)
+                    backItem.setValuesForKeys(["id": nextId, "timestamp": Date()])
+                    try? viewContext.save()
                     urlString = "https://qwantz.com/index.php?comic=\(comicId)"
-//                    print("Will go forward to \(urlString)")
+                    print("Will go forward to \(urlString), comicId now = \(comicId)")
                     
                 }, label: { Text("Forward") })
             }
@@ -117,12 +121,12 @@ struct ContentView: View {
                 if ( lastComicId != id || backItems.isEmpty) {
                     // this way we don't add a history item on a refresh or initial app load from a history state
                     let idItem = ComicIdHistory(context: viewContext)
-//                    print("Adding item with id \(id) in navigation callback")
+                    print("Adding item with id \(id) in navigation callback")
                     idItem.setValue(Date(), forKey: "timestamp")
                     idItem.setValue(id, forKey: "id")
                     try? self.viewContext.save()
                 } else {
-//                    print("Not adding back record for \(id) since lastComicId was already this")
+                    print("Not adding back record for \(id) since lastComicId was already this")
                 }
             })
             VStack {
@@ -147,7 +151,7 @@ struct ContentView: View {
             try! viewContext.save()
             // TODO: how do I force-refresh my other items query to reflect these changes?
             print("We have \(backItems.count) items in back stack; \(forwardItems.count) in forward stack")
-            comicId = backItems.isEmpty ? 2487 : backItems.first!.value(forKey: "id")! as! Int
+            comicId = backItems.isEmpty ? 2522 : backItems.first!.value(forKey: "id")! as! Int
             urlString =  "https://qwantz.com/index.php?comic=\(comicId)"
             print("done with onAppear, will load \(urlString)")
         })
