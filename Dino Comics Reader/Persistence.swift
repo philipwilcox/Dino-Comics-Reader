@@ -10,11 +10,12 @@ import CoreData
 struct PersistenceController {
     static let shared = PersistenceController()
 
+    // TODO: do I need any of this or was it just boilerplate for the example?
     static var preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
         for _ in 0..<10 {
-            let newItem = ComicId(context: viewContext)
+            let newItem = ComicIdHistory(context: viewContext)
             newItem.timestamp = Date()
         }
         do {

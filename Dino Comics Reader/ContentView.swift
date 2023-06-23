@@ -8,6 +8,7 @@
 import SwiftUI
 import CoreData
 
+
 struct ComicIdFieldView: View {
     @Binding var comicId: Int
     let completionCallback: (Int) -> Void
@@ -20,21 +21,28 @@ struct ComicIdFieldView: View {
     }
 }
 
+// TODO: build a back button/forward button
+// TODO: track history (last N?)
+
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \ComicId.timestamp, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \ComicIdHistory.timestamp, ascending: true)],
         animation: .default)
-    private var items: FetchedResults<ComicId>
+    private var backItems: FetchedResults<ComicIdHistory>
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \ComicIdForwardHistory.timestamp, ascending: true)],
+        animation: .default)
+    private var forwardItems: FetchedResults<ComicIdForwardHistory>
+    // TODO: how should I really do a navigation stack?
 
     @State var secret1 = ""
     @State var secret2 = ""
     @State var secret3 = ""
     @State var comicId = 1
     @State var urlString = ""
-    
     
     var body: some View {
         VStack() {
@@ -48,18 +56,27 @@ struct ContentView: View {
                 // TODO: add a "goto" button
                 ComicIdFieldView(comicId: $comicId, completionCallback: {
                     id in
-                    if (items.isEmpty) {
-                        let idItem = ComicId(context: viewContext)
-                        idItem.setValue(id, forKey: "id")
-                    } else {
-                        let item = items.first
-                        item!.setValue(id, forKey: "id")
-                    }
+                    let idItem = ComicIdHistory(context: viewContext)
+                    idItem.setValue(id, forKey: "id")
+                    idItem.setValue(Date(), forKey: "timestamp")
                     try? self.viewContext.save()
                     urlString = "https://qwantz.com/index.php?comic=\(id)"
                 })
                 .frame(width: 55).padding(.trailing)
-                // TODO: the frame constraints around this are conflicting and need debugging
+                // TODO: the frame constraints around this are conflicting and need debugging when I click into it
+                Button(action: {
+                    // TODO: disable if items is empty?
+                    let nextItem = backItems[1]
+                    let lastItem = backItems[0]
+                    let forwardItem = ComicIdForwardHistory(context: viewContext)
+                    forwardItem.setValue(lastItem.id, forKey: "id")
+                    forwardItem.setValue(Date(), forKey: "timestamp")
+                    viewContext.delete(lastItem)
+                    try? viewContext.save()
+                    // TODO: make a helper for updating these two state vars? or make urlstring computed again?
+                    comicId = nextItem.value(forKey: "id") as! Int
+                    urlString = "https://qwantz.com/index.php?comic=\(comicId)"
+                }, label: { Text("Back") })
             }
             WebView(urlString: $urlString,
             secretTextFetcher: {
@@ -69,17 +86,12 @@ struct ContentView: View {
                 secret3 = text3
             },
                 comicIdFetcher: {
-                // TODO: this is running a few times per navigation since we extract the alt text AFTER The first refresh, we should redo that with bindings or such...
                 id in
                 comicId = id
                 urlString = "https://qwantz.com/index.php?comic=\(id)"
-                if (items.isEmpty) {
-                    let idItem = ComicId(context: viewContext)
-                    idItem.setValue(id, forKey: "id")
-                } else {
-                    let item = items.first
-                    item!.setValue(id, forKey: "id")
-                }
+                let idItem = ComicIdHistory(context: viewContext)
+                idItem.setValue(Date(), forKey: "timestamp")
+                idItem.setValue(id, forKey: "id")
                 try? self.viewContext.save()
             })
             VStack {
@@ -89,8 +101,19 @@ struct ContentView: View {
             }
         }.onAppear(perform: {
             // TODO: move this to a named method for readability
-            comicId = items.isEmpty ? 2487 : items.first!.value(forKey: "id")! as! Int
-            print(comicId)
+            // TODO: delete any backItems and forwardItems without timestamps
+            // TODO: make this all optional for init / add a "debug panel"?
+//            let fetchRequest1 = NSFetchRequest<NSFetchRequestResult>(entityName: "ComicIdHistory")
+//            let deleteRequest1 = NSBatchDeleteRequest(fetchRequest: fetchRequest1)
+//            let fetchRequest2 = NSFetchRequest<NSFetchRequestResult>(entityName: "ComicIdForwardHistory")
+//            let deleteRequest2 = NSBatchDeleteRequest(fetchRequest: fetchRequest2)
+//            do {
+//                try viewContext.execute(deleteRequest1)
+//                try viewContext.execute(deleteRequest2)
+//            } catch _ as NSError {
+//                // TODO: handle the error
+//            }
+            comicId = backItems.isEmpty ? 2487 : backItems.first!.value(forKey: "id")! as! Int
             urlString =  "https://qwantz.com/index.php?comic=\(comicId)"
             print("done with onAppear")
         })
