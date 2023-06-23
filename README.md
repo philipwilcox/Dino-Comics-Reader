@@ -8,3 +8,5 @@ TODOs include:
 * opening non-navigation links in external browser
 * better layout, especially for phone
 * TV/Mac support for fun
+* cloud sync for bookmark
+* favorites

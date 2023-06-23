@@ -6,6 +6,7 @@ struct WebView: UIViewRepresentable {
     let url: URL
     
     let secretTextFetcher: (String, String, String) -> Void
+    let comicIdFetcher: (Int) -> Void
     
     func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
@@ -24,16 +25,17 @@ struct WebView: UIViewRepresentable {
     }
     
     func makeCoordinator() -> Coordinator {
-        Coordinator(secretTextFetcher: secretTextFetcher)
+        Coordinator(secretTextFetcher: secretTextFetcher, comicIdFetcher: comicIdFetcher)
     }
     
     class Coordinator: NSObject, WKNavigationDelegate {
         let secretTextFetcher: (String, String, String) -> Void
+        let comicIdFetcher: (Int) -> Void
         
-        init(secretTextFetcher: @escaping (String, String, String) -> Void) {
+        init(secretTextFetcher: @escaping (String, String, String) -> Void, comicIdFetcher: @escaping (Int) -> Void) {
             self.secretTextFetcher = secretTextFetcher
+            self.comicIdFetcher = comicIdFetcher
         }
-        
         
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             webView.evaluateJavaScript("document.documentElement.outerHTML.toString()") { html, error in
@@ -43,7 +45,6 @@ struct WebView: UIViewRepresentable {
 
                     let comic = try! doc.select("img.comic").first()!
                     let alt1 = try! comic.attr("title")
-                    let contactQueryString = try! doc.select("a:contains(contact)").first()!.attr("href").split(separator: "?", maxSplits: 1, omittingEmptySubsequences: true)[1]
                     let contactString = try! doc.select("a:contains(contact)").first()!.attr("href")
                     let alt2 = URLComponents(string: contactString)!.queryItems!.first(where: { $0.name == "subject" })!.value!
                     print(alt2)
@@ -53,6 +54,13 @@ struct WebView: UIViewRepresentable {
                     
                     self.secretTextFetcher(alt1, alt2, alt3)
                     }
+            }
+        }
+        
+        func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+            if let url = webView.url {
+                let comicId = Int(URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems?.first(where: { $0.name == "comic" })!.value ?? "1")!
+                self.comicIdFetcher(comicId)
             }
         }
     }
