@@ -8,6 +8,25 @@
 import SwiftUI
 import CoreData
 
+struct ComicIdFieldView: View {
+    @Binding var comicId: Int
+    let completionCallback: (Int) -> Void
+    
+    
+//    init(initialId: Binding<Int>, completionCallback: @escaping (Int) -> Void) {
+//        self.completionCallback = completionCallback
+//        _comicId = Binding(initialvalue: initialId)
+//    }
+    
+    var body : some View {
+        TextField("Comic", value: $comicId, formatter: NumberFormatter())
+            .keyboardType(.numberPad).onSubmit {
+                completionCallback(comicId)
+            }
+    }
+}
+
+
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
@@ -19,17 +38,45 @@ struct ContentView: View {
     @State var secret1 = ""
     @State var secret2 = ""
     @State var secret3 = ""
+    @State var comicId = 1
+    @State var urlString = ""
+    
+    init() {
+        print("in init")
+        // TODO: why is it complaining about this one
+        _comicId = State(initialValue:  items.isEmpty ? 2487 : items.first!.value(forKey: "id")! as! Int)
+        _urlString = State(initialValue: "https://qwantz.com/index.php?comic=\(comicId)")
+        print("done with init")
+    }
+    
+    
     
     var body: some View {
-        VStack {
-            Text("Something New")
-                .font(.title)
-            // TODO: add a "goto" button; start from at least 2487 for my manual init
+        VStack() {
+//            let _ = {
+//                print(displayComicId)
+//                print(urlString)
+//            }()
             // TODO: sync to cloud
-            let comicId = items.isEmpty ? 1 : items.first!.value(forKey: "id")!
-            let urlString = "https://qwantz.com/index.php?comic=\(comicId)"
-            let url = URL(string: urlString)!
-            WebView(url: url,
+            HStack{
+                Text(urlString).padding(.leading).frame(maxWidth: .infinity, alignment: .leading).padding(.leading)
+                // TODO: add a "goto" button
+                ComicIdFieldView(comicId: $comicId, completionCallback: {
+                    id in
+                    if (items.isEmpty) {
+                        let idItem = ComicId(context: viewContext)
+                        idItem.setValue(id, forKey: "id")
+                    } else {
+                        let item = items.first
+                        item!.setValue(id, forKey: "id")
+                    }
+                    try? self.viewContext.save()
+                    urlString = "https://qwantz.com/index.php?comic=\(id)"
+                })
+                .frame(width: 55).padding(.trailing)
+                // TODO: the frame constraints around this are conflicting and need debugging
+            }
+            WebView(urlString: $urlString,
             secretTextFetcher: {
                 text1, text2, text3 in
                 secret1 = text1
@@ -37,8 +84,10 @@ struct ContentView: View {
                 secret3 = text3
             },
                 comicIdFetcher: {
+                // TODO: this is running a few times per navigation since we extract the alt text AFTER The first refresh, we should redo that with bindings or such...
                 id in
-                print(id)
+                comicId = id
+                urlString = "https://qwantz.com/index.php?comic=\(id)"
                 if (items.isEmpty) {
                     let idItem = ComicId(context: viewContext)
                     idItem.setValue(id, forKey: "id")
@@ -48,12 +97,13 @@ struct ContentView: View {
                 }
                 try? self.viewContext.save()
             })
-            Text(secret1).font(.caption)
-            Text(secret2).font(.caption2)
-            Text(secret3).font(.caption)
+            VStack {
+                Text(secret1).font(.caption).foregroundColor(Color(red: 1, green: 0.4, blue: 0))
+                Text(secret2).font(.caption2).foregroundColor(Color(red: 1, green: 0.7, blue: 0))
+                Text(secret3).font(.caption).foregroundColor(Color(red: 0.7, green: 0.4, blue: 0))
+            }
         }
     }
-
 }
 
 struct ContentView_Previews: PreviewProvider {

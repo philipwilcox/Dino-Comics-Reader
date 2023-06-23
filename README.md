@@ -10,3 +10,4 @@ TODOs include:
 * TV/Mac support for fun
 * cloud sync for bookmark
 * favorites
+* clone navigation buttons on sides in ipad wide view for touchscreen remote or bluetooth controller
