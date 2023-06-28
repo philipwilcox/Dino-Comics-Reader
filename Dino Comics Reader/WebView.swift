@@ -1,6 +1,6 @@
+import SwiftSoup
 import SwiftUI
 import WebKit
-import SwiftSoup
 
 struct WebView: UIViewRepresentable {
     @Binding var urlString: String
@@ -21,7 +21,7 @@ struct WebView: UIViewRepresentable {
         // "Debounce" so that if the url didn't change we don't refresh so that when we update the alt text state we don't reload the page and create an uncessary page view
         // Note that we store the state in the Coordinator since we can't track state (or mutate it) here
         //        print("Should I do update? urlString \(urlString) vs \(context.coordinator.lastUrl)")
-        if (urlString != context.coordinator.lastUrl) {
+        if urlString != context.coordinator.lastUrl {
             let request = URLRequest(url: URL(string: urlString)!)
             webView.load(request)
         }
@@ -46,15 +46,15 @@ struct WebView: UIViewRepresentable {
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             // Update both the url ID and texts in the same didFinish, vs updating URL when we start navigating, to minimize state changes
             if let url = webView.url {
-                self.lastUrl = url.absoluteString
+                lastUrl = url.absoluteString
                 let comicId = Int(URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems?.first(where: { $0.name == "comic" })!.value ?? "1")!
-                self.comicIdFetcher(comicId)
+                comicIdFetcher(comicId)
             }
-            webView.evaluateJavaScript("document.documentElement.outerHTML.toString()") { html, error in
+            webView.evaluateJavaScript("document.documentElement.outerHTML.toString()") { html, _ in
                 if let html = html as? String {
                     // TODO: improve all this hideous error handling
                     let doc: Document = try! SwiftSoup.parse(html)
-                    
+                    // TODO: this doesn't work for mobile html! It crashes currently!
                     let comic = try! doc.select("img.comic").first()!
                     let alt1 = try! comic.attr("title")
                     let contactString = try! doc.select("a:contains(contact)").first()!.attr("href")
@@ -75,7 +75,7 @@ struct WebView: UIViewRepresentable {
                         let pathPattern = "/index.php\\?comic=\\d+"
                         let fullPath = "\(url.path())?\(url.query()!)"
                         print(fullPath)
-                        if (fullPath.range(of: pathPattern, options: .regularExpression, range: nil, locale: nil) != nil) {
+                        if fullPath.range(of: pathPattern, options: .regularExpression, range: nil, locale: nil) != nil {
                             decisionHandler(.allow)
                         } else {
                             print("No match")
@@ -91,8 +91,7 @@ struct WebView: UIViewRepresentable {
                     // TODO: wtf kinda case would be this? but don't interfere I guess...
                     decisionHandler(.allow)
                 }
-            }
-            else {
+            } else {
                 decisionHandler(.allow)
             }
         }
