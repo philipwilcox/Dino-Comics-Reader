@@ -13,7 +13,14 @@ struct PersistenceController {
     static var preview: PersistenceController = {
         // TODO: set up some mock comics data for preview?
         let result = PersistenceController(inMemory: true)
-//        let viewContext = result.container.viewContext
+        let viewContext = result.container.viewContext
+        let newItem = ComicIdHistory(context: viewContext)
+        newItem.timestamp = Date()
+        newItem.id = 2500
+        let newItem2 = ComicIdForwardHistory(context: viewContext)
+        newItem2.timestamp = Date()
+        newItem2.id = 2501
+        try! viewContext.save()
 //        for _ in 0..<10 {
 //            let newItem = ComicIdHistory(context: viewContext)
 //            newItem.timestamp = Date()

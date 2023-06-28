@@ -52,8 +52,8 @@ struct ContentView: View {
 //            }()
             // TODO: sync to cloud
             HStack{
-                Text(urlString).padding(.leading).frame(maxWidth: .infinity, alignment: .leading).padding(.leading)
-                // TODO: add a "goto" button
+                Text(urlString).padding(.leading).frame(alignment: .leading)
+                Spacer()
                 ComicIdFieldView(comicId: $comicId, completionCallback: {
                     id in
                     let idItem = ComicIdHistory(context: viewContext)
@@ -63,14 +63,13 @@ struct ContentView: View {
                     try? self.viewContext.save()
                     urlString = "https://qwantz.com/index.php?comic=\(id)"
                 })
-                .frame(width: 55).padding(.trailing)
-                // TODO: the frame constraints around this are conflicting and need debugging when I click into it
+                .frame(width: 60)
+                // TODO: there's some sort of contraint violation here, learn to debug
                 Button(action: {
                     // TODO: disable if items has less than length 2
                     let lastItem = backItems[0]
                     let lastId = lastItem.value(forKey: "id")
                     print("last item id is \(String(describing: lastId)) vs comic ID which is \(comicId)")
-                    // TODO: currently a "back/forward/back" sequence is crashing on this assertion
                     assert(lastItem.value(forKey: "id") as! Int == comicId)
                     let nextItem = backItems[1]
 //                    print("Got last two items from back history: \(String(describing: lastItem.value(forKey: "id"))), \(String(describing: nextItem.value(forKey: "id")))")
@@ -130,9 +129,9 @@ struct ContentView: View {
                 }
             })
             VStack {
-                Text(secret1).font(.caption).foregroundColor(Color(red: 1, green: 0.4, blue: 0))
-                Text(secret2).font(.caption2).foregroundColor(Color(red: 1, green: 0.7, blue: 0))
-                Text(secret3).font(.caption).foregroundColor(Color(red: 0.7, green: 0.4, blue: 0))
+                Text(secret1).font(.caption2).foregroundColor(Color(red: 1, green: 0.4, blue: 0)).multilineTextAlignment(.center)
+                Text(secret2).font(.caption2).foregroundColor(Color(red: 1, green: 0.7, blue: 0)).multilineTextAlignment(.center)
+                Text(secret3).font(.caption2).foregroundColor(Color(red: 0.7, green: 0.4, blue: 0)).multilineTextAlignment(.center)
             }
         }.onAppear(perform: {
             // TODO: move this to a named method for readability
@@ -159,6 +158,7 @@ struct ContentView: View {
 }
 
 struct ContentView_Previews: PreviewProvider {
+    // TODO: if i don't create both a back and forward history item in the preview persistence env this fails on "Fetch request must have an entity"
     static var previews: some View {
         ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
     }

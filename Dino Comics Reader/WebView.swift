@@ -7,7 +7,7 @@ struct WebView: UIViewRepresentable {
     
     let secretTextFetcher: (String, String, String) -> Void
     let comicIdFetcher: (Int) -> Void
-        
+    
     func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
         webView.customUserAgent = "PW Annotator"
@@ -20,7 +20,7 @@ struct WebView: UIViewRepresentable {
     func updateUIView(_ webView: WKWebView, context: Context) {
         // "Debounce" so that if the url didn't change we don't refresh so that when we update the alt text state we don't reload the page and create an uncessary page view
         // Note that we store the state in the Coordinator since we can't track state (or mutate it) here
-//        print("Should I do update? urlString \(urlString) vs \(context.coordinator.lastUrl)")
+        //        print("Should I do update? urlString \(urlString) vs \(context.coordinator.lastUrl)")
         if (urlString != context.coordinator.lastUrl) {
             let request = URLRequest(url: URL(string: urlString)!)
             webView.load(request)
@@ -54,7 +54,7 @@ struct WebView: UIViewRepresentable {
                 if let html = html as? String {
                     // TODO: improve all this hideous error handling
                     let doc: Document = try! SwiftSoup.parse(html)
-
+                    
                     let comic = try! doc.select("img.comic").first()!
                     let alt1 = try! comic.attr("title")
                     let contactString = try! doc.select("a:contains(contact)").first()!.attr("href")
@@ -64,7 +64,36 @@ struct WebView: UIViewRepresentable {
                     let alt3 = try! SwiftSoup.parse(commentElement.getData()).select("span").first()!.text()
                     
                     self.secretTextFetcher(alt1, alt2, alt3)
+                }
+            }
+        }
+        
+        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+            if navigationAction.navigationType == .linkActivated {
+                if let url = navigationAction.request.url {
+                    if (url.host == "www.qwantz.com" || url.host == "qwantz.com") && url.query() != nil {
+                        let pathPattern = "/index.php\\?comic=\\d+"
+                        let fullPath = "\(url.path())?\(url.query()!)"
+                        print(fullPath)
+                        if (fullPath.range(of: pathPattern, options: .regularExpression, range: nil, locale: nil) != nil) {
+                            decisionHandler(.allow)
+                        } else {
+                            print("No match")
+                            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                            decisionHandler(.cancel)
+                        }
+                    } else {
+                        //                        print("would open browser for non-comic link")
+                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                        decisionHandler(.cancel)
                     }
+                } else {
+                    // TODO: wtf kinda case would be this? but don't interfere I guess...
+                    decisionHandler(.allow)
+                }
+            }
+            else {
+                decisionHandler(.allow)
             }
         }
     }
