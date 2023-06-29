@@ -119,13 +119,8 @@ class ComicViewModel: ObservableObject {
         backFetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
         backFetchRequest.fetchLimit = 1
 
-//           let forwardFetchRequest: NSFetchRequest<ComicIdForwardHistory> = ComicIdForwardHistory.fetchRequest()
-//           forwardFetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
-//           forwardFetchRequest.fetchLimit = 1
-
         do {
             let lastBackItem = try context.fetch(backFetchRequest).first
-//               let lastForwardItem = try context.fetch(forwardFetchRequest).first
 
             // Handle the changed data
             comicId = Int(lastBackItem!.id)

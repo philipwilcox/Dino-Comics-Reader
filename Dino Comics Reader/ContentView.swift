@@ -49,9 +49,9 @@ struct ContentView: View {
                     },
                     comicIdFetcher: viewModel.reflectNavigationTo)
             VStack {
-                Text(secret1).font(.caption2).foregroundColor(Color(red: 1, green: 0.4, blue: 0)).multilineTextAlignment(.center)
-                Text(secret2).font(.caption2).foregroundColor(Color(red: 1, green: 0.7, blue: 0)).multilineTextAlignment(.center)
-                Text(secret3).font(.caption2).foregroundColor(Color(red: 0.7, green: 0.4, blue: 0)).multilineTextAlignment(.center)
+                Text(secret1).font(.caption2).foregroundColor(Color(red: 1, green: 0.4, blue: 0)).multilineTextAlignment(.center).textSelection(.enabled)
+                Text(secret2).font(.caption2).foregroundColor(Color(red: 1, green: 0.7, blue: 0)).multilineTextAlignment(.center).textSelection(.enabled)
+                Text(secret3).font(.caption2).foregroundColor(Color(red: 0.7, green: 0.4, blue: 0)).multilineTextAlignment(.center).textSelection(.enabled)
             }
         }.onAppear(perform: {
             print("done with onAppear, will load \(viewModel.currentUrl)")
@@ -60,7 +60,6 @@ struct ContentView: View {
 }
 
 struct ContentView_Previews: PreviewProvider {
-    // TODO: if i don't create both a back and forward history item in the preview persistence env this fails on "Fetch request must have an entity"
     static var previews: some View {
         ContentView(viewModel: ComicViewModel(comicId: 2688, currentUrl: "https://qwantz.com/index.php?comic=2600", context: PersistenceController.preview.container.viewContext)).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
     }
