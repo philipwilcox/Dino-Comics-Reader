@@ -7,6 +7,7 @@ doesn't do anything fancy, just extracts the text so you don't have to. wraps th
 TODOs include:
 * favorites (also cloud synced)
 * clone navigation buttons on sides in ipad wide view for touchscreen remote or bluetooth controller
+* Unit tests
 * add auto-migration for old-formatted internal navigation links in news? what was this pattern?
 * better layout, especially for phone; be able to parse HTML in phone mode...
 * add a limit to how many history items are kept
