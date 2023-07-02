@@ -55,6 +55,7 @@ struct ContentView: View {
             }
         }.onAppear(perform: {
             print("done with onAppear, will load \(viewModel.currentUrl)")
+
         })
     }
 }

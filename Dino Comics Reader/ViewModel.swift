@@ -13,15 +13,6 @@ class ComicViewModel: ObservableObject {
     @Published var comicId: Int
     @Published var currentUrl: String
 
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \ComicIdHistory.timestamp, ascending: false)],
-        animation: .default)
-    private var backItems: FetchedResults<ComicIdHistory>
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \ComicIdForwardHistory.timestamp, ascending: false)],
-        animation: .default)
-    private var forwardItems: FetchedResults<ComicIdForwardHistory>
-
     private var context: NSManagedObjectContext
     private var cloudStoreDidChange: AnyCancellable?
 
@@ -32,6 +23,7 @@ class ComicViewModel: ObservableObject {
 
         cloudStoreDidChange = NotificationCenter.default.publisher(for: .NSPersistentStoreRemoteChange)
             .sink { [weak self] _ in
+                print("Handling notification for persistant storage change")
                 self?.handleCloudStoreChange()
             }
     }
@@ -99,7 +91,10 @@ class ComicViewModel: ObservableObject {
         comicId = newComicId
         currentUrl = "https://qwantz.com/index.php?comic=\(newComicId)"
         // TODO: make a URL builder convenience Util func in a Utils file
-        if lastComicId != newComicId || backItems.isEmpty {
+
+        let backFetchRequest = createBackFetchRequest(limit: 1)
+        let lastBackItem = try? context.fetch(backFetchRequest)
+        if lastBackItem == nil || lastBackItem!.isEmpty || lastComicId != newComicId {
             // this way we don't add a history item on a refresh or initial app load from a history state that we're already tracking as most recent page
             let idItem = ComicIdHistory(context: context)
             print("Adding item with id \(newComicId) in navigation callback")
@@ -115,18 +110,18 @@ class ComicViewModel: ObservableObject {
         // TODO: make this optional? have some way to reject remote changes?
         // Fetch the latest back and forward history items
         print("Reloading for change in cloud storage!")
+        let backFetchRequest = createBackFetchRequest(limit: 1)
+        let lastBackItem = try! context.fetch(backFetchRequest).first
+
+        // Handle the changed data
+        comicId = Int(lastBackItem!.id)
+        currentUrl = "https://qwantz.com/index.php?comic=\(comicId)"
+    }
+
+    private func createBackFetchRequest(limit: Int) -> NSFetchRequest<ComicIdHistory> {
         let backFetchRequest: NSFetchRequest<ComicIdHistory> = ComicIdHistory.fetchRequest()
         backFetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
-        backFetchRequest.fetchLimit = 1
-
-        do {
-            let lastBackItem = try context.fetch(backFetchRequest).first
-
-            // Handle the changed data
-            comicId = Int(lastBackItem!.id)
-            currentUrl = "https://qwantz.com/index.php?comic=\(comicId)"
-        } catch {
-            print("Failed to fetch history items: \(error)")
-        }
+        backFetchRequest.fetchLimit = limit
+        return backFetchRequest
     }
 }
