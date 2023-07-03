@@ -19,8 +19,9 @@ struct Dino_Comics_ReaderApp: App {
 
         do {
             let lastItem = try persistenceController.container.viewContext.fetch(fetchRequest).first
-            let comicId = Int(lastItem?.id ?? 2688)
+            let comicId = Int(lastItem?.id ?? 2801)
             let urlString = "https://qwantz.com/index.php?comic=\(comicId)"
+            print("Fetched comicId \(comicId) from store from record with timestamp \(String(describing: lastItem?.timestamp))")
             return ComicViewModel(comicId: comicId, currentUrl: urlString, context: persistenceController.container.viewContext)
         } catch {
             print("Failed to fetch ComicIdBackHistory: \(error)")

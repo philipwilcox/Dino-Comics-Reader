@@ -9,7 +9,6 @@ TODOs include:
     * key: comicId
     * title: "alt 3" rss name of the comic
 * Look at MVVM tutorial here https://www.toptal.com/swift/static-patterns-swift-mvvm-tutorial
-* debug cloudkit with https://stackoverflow.com/questions/66075714/using-cloudkit-coredata-how-to-update-ui-from-remote-cloud-update-without-swi
 * clone navigation buttons on sides in ipad wide view for touchscreen remote or bluetooth controller
 * Unit tests
 * add auto-migration for old-formatted internal navigation links in news? what was this pattern?
@@ -17,3 +16,4 @@ TODOs include:
 * add a limit to how many history items are kept
 * Add some way to "reject" a remote state update, and get better control over when this happen
 * TV/Mac support for fun
+* try to debug cloudkit notification listener stuff in addition to timer-based world

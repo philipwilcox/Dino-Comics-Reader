@@ -72,6 +72,17 @@ struct WebView: UIViewRepresentable {
             if navigationAction.navigationType == .linkActivated {
                 if let url = navigationAction.request.url {
                     if (url.host == "www.qwantz.com" || url.host == "qwantz.com") && url.query() != nil {
+                        if url.scheme == "http" {
+                            var components = URLComponents(url: url, resolvingAgainstBaseURL: true)
+                            // TODO: make this more idiomatci
+                            if components != nil {
+                                components!.scheme = "https"
+                                let secureRequest = URLRequest(url: components!.url!)
+                                webView.load(secureRequest)
+                                decisionHandler(.cancel)
+                                return
+                            }
+                        }
                         let pathPattern = "/index.php\\?comic=\\d+"
                         let fullPath = "\(url.path())?\(url.query()!)"
                         print(fullPath)
