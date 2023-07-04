@@ -20,6 +20,10 @@ struct PersistenceController {
         newItem2.timestamp = Date()
         newItem2.id = 2501
         try! viewContext.save()
+        let newFavorite = ComicFavorite(context: viewContext)
+        newFavorite.title = "Preview mode favorite"
+        newFavorite.id = 2501
+        newFavorite.timestamp = Date()
         return result
     }()
 

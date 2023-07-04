@@ -10,20 +10,31 @@ import CoreData
 import SwiftUI
 
 class ComicViewModel: ObservableObject {
-    @Published var comicId: Int
+    @Published var comicId: Int32
     @Published var currentUrl: String
+    @Published var isFavorite: Bool
+    @Published var altText1: String
+    @Published var altText2: String
+    @Published var altText3: String
+
+    private var altTextComicId: Int32?
 
     private var context: NSManagedObjectContext
 
     private var timer: Timer?
 
-    init(comicId: Int, currentUrl: String, context: NSManagedObjectContext) {
+    init(comicId: Int32, currentUrl: String, isFavorite: Bool, context: NSManagedObjectContext) {
+        self.context = context
         self.comicId = comicId
         self.currentUrl = currentUrl
-        self.context = context
+        self.isFavorite = isFavorite
+        // dumb defaults for the following before we load the webview to fetch them since we don't store them in coredata state
+        self.altText1 = ""
+        self.altText2 = ""
+        self.altText3 = ""
 
         // TODO: set a second periodic timer? And for that one add an invalidation stopTimer() method that the View can hook into if it goes away
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false, block: { _ in
+        self.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false, block: { _ in
             self.refresh()
         })
     }
@@ -41,7 +52,7 @@ class ComicViewModel: ObservableObject {
                 newForwardItem.id = Int32(comicId)
                 newForwardItem.timestamp = Date()
 
-                comicId = Int(lastItem.id)
+                comicId = lastItem.id
                 currentUrl = "https://qwantz.com/index.php?comic=\(comicId)"
 
                 context.delete(currentItem)
@@ -51,6 +62,7 @@ class ComicViewModel: ObservableObject {
         } catch {
             print("Failed to fetch ComicIdBackHistory: \(error)")
         }
+        updateFavoriteStatus()
         showMostRecentHistory(limit: 10, desc: "from navigateBack")
     }
 
@@ -65,7 +77,7 @@ class ComicViewModel: ObservableObject {
                 newBackItem.id = Int32(comicId)
                 newBackItem.timestamp = Date()
 
-                comicId = Int(nextItem.id)
+                comicId = nextItem.id
                 currentUrl = "https://qwantz.com/index.php?comic=\(comicId)"
 
                 // Delete the next item from the forward history
@@ -75,10 +87,11 @@ class ComicViewModel: ObservableObject {
         } catch {
             print("Failed to fetch ComicIdForwardHistory: \(error)")
         }
+        updateFavoriteStatus()
         showMostRecentHistory(limit: 10, desc: "from navigateForward")
     }
 
-    func navigateTo(newComicId: Int) {
+    func navigateTo(newComicId: Int32) {
         let idItem = ComicIdHistory(context: context)
         print("Adding item with id \(newComicId) in webview completion callback")
         idItem.setValue(newComicId, forKey: "id")
@@ -86,10 +99,11 @@ class ComicViewModel: ObservableObject {
         try? context.save()
         comicId = newComicId
         currentUrl = "https://qwantz.com/index.php?comic=\(newComicId)"
+        updateFavoriteStatus()
         showMostRecentHistory(limit: 10, desc: "from navigateTo")
     }
 
-    func reflectNavigationTo(newComicId: Int) {
+    func reflectNavigationTo(newComicId: Int32) {
         // Called when the webview has navigated to a new comic, to keep track of this in the state
         let lastComicId = comicId
         comicId = newComicId
@@ -110,14 +124,78 @@ class ComicViewModel: ObservableObject {
             try? context.save()
         } else {
             // When we navigate, depending on if we went through the UI back/forward or links in the webview, we might have already manipulated the back/forward state. So if we've already updated lastComicId, we don't need a new history state update
-            // TODO: think more about how that link between history state and back/forward works in a world with cloudkit and all too...
-            // TODO: why not let THIS always be what maintains our back-state-adding?
             // TODO: what are the UI tests I want around this?
-            // TODO: does pushing back/forward too fast before this is run cause issues? should I update history EARLIER on URL load?
             print("Not adding back record for \(newComicId) since lastComicId was already this")
         }
-        
+        updateFavoriteStatus()
+
         showMostRecentHistory(limit: 10, desc: "from reflectNavigationTo")
+    }
+
+    func metadataUpdater(alt1: String, alt2: String, alt3: String) {
+        altText1 = alt1
+        altText2 = alt2
+        altText3 = alt3
+        altTextComicId = comicId
+    }
+
+    func metadataUpToDate() -> Bool {
+        return comicId == altTextComicId
+    }
+
+    func toggleFavorite() {
+        let r = getFavoriteRecords()
+        if r.isEmpty {
+            if metadataUpToDate() {
+                // TODO: disable from UI if not
+                // don't let the user favorite a comic until the alt text is parsed so we save the favorite with the correct title
+                let newFavorite = ComicFavorite(context: context)
+                newFavorite.id = comicId
+                newFavorite.timestamp = Date()
+                newFavorite.title = altText3
+                try? context.save()
+            }
+        } else {
+            let oldFavorite = r.first
+            if oldFavorite != nil {
+                context.delete(oldFavorite!)
+                try? context.save()
+            }
+        }
+        updateFavoriteStatus()
+    }
+
+    private func updateFavoriteStatus() {
+        let favoriteResult = getFavoriteRecords()
+        if favoriteResult.isEmpty {
+            isFavorite = false
+        } else {
+            isFavorite = true
+        }
+    }
+
+    private func getFavoriteRecords() -> [ComicFavorite] {
+        let fetchRequest: NSFetchRequest<ComicFavorite> = ComicFavorite.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", NSNumber(value: comicId))
+        let r = try! context.fetch(fetchRequest)
+        return r
+    }
+
+    private func refresh() {
+        // We're gonna check if our backing data in CloudKit has changed 5s after app start to see if we need to update our location
+        let fetchRequest = createBackFetchRequest(limit: 1)
+        let lastBackItem = try? context.fetch(fetchRequest)
+        let lastComicId = lastBackItem?.first?.id
+        if lastComicId != nil {
+            let newComicId = lastComicId!
+            if comicId != newComicId {
+                print("Updating current comic from refreshed state to \(newComicId) from \(comicId)")
+                comicId = newComicId
+                currentUrl = "https://qwantz.com/index.php?comic=\(newComicId)"
+            }
+        }
+        updateFavoriteStatus()
+        showMostRecentHistory(limit: 10, desc: "from refresh")
     }
 
     private func createBackFetchRequest(limit: Int) -> NSFetchRequest<ComicIdHistory> {
@@ -126,39 +204,22 @@ class ComicViewModel: ObservableObject {
         backFetchRequest.fetchLimit = limit
         return backFetchRequest
     }
-    
+
     private func showMostRecentHistory(limit: Int, desc: String) {
         let backFetchRequest = createBackFetchRequest(limit: limit)
         let lastBackItems = try? context.fetch(backFetchRequest)
-        lastBackItems?.forEach({
+        lastBackItems?.forEach {
             h in
             print("\(desc) Back item \(h.id) from \(h.timestamp)")
-        })
-        
+        }
+
         let forwardFetchRequest: NSFetchRequest<ComicIdForwardHistory> = ComicIdForwardHistory.fetchRequest()
         forwardFetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
         forwardFetchRequest.fetchLimit = limit
         let lastForwardItems = try? context.fetch(forwardFetchRequest)
-        lastForwardItems?.forEach({
+        lastForwardItems?.forEach {
             h in
             print("\(desc) Forward item \(h.id) from \(h.timestamp)")
-        })
-    }
-
-    func refresh() {
-        // We're gonna check if our backing data in CloudKit has changed 5s after app start to see if we need to update our location
-        let fetchRequest = createBackFetchRequest(limit: 1)
-        let lastBackItem = try? context.fetch(fetchRequest)
-        let lastComicId = lastBackItem?.first?.id
-        if lastComicId != nil {
-            // Any way to improve int32 vs int coercion here?
-            let newComicId = Int(lastComicId!)
-            if comicId != newComicId {
-                print("Updating current comic from refreshed state to \(newComicId) from \(comicId)")
-                comicId = newComicId
-                currentUrl = "https://qwantz.com/index.php?comic=\(newComicId)"
-            }
         }
-        showMostRecentHistory(limit: 10, desc: "from refresh")
     }
 }

@@ -6,7 +6,7 @@ struct WebView: UIViewRepresentable {
     @Binding var urlString: String
     
     let secretTextFetcher: (String, String, String) -> Void
-    let comicIdFetcher: (Int) -> Void
+    let comicIdFetcher: (Int32) -> Void
     
     func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
@@ -34,10 +34,10 @@ struct WebView: UIViewRepresentable {
     
     class Coordinator: NSObject, WKNavigationDelegate {
         let secretTextFetcher: (String, String, String) -> Void
-        let comicIdFetcher: (Int) -> Void
+        let comicIdFetcher: (Int32) -> Void
         var lastUrl: String
         
-        init(secretTextFetcher: @escaping (String, String, String) -> Void, comicIdFetcher: @escaping (Int) -> Void) {
+        init(secretTextFetcher: @escaping (String, String, String) -> Void, comicIdFetcher: @escaping (Int32) -> Void) {
             self.secretTextFetcher = secretTextFetcher
             self.comicIdFetcher = comicIdFetcher
             self.lastUrl = ""
@@ -47,7 +47,7 @@ struct WebView: UIViewRepresentable {
             // Update both the url ID and texts in the same didFinish, vs updating URL when we start navigating, to minimize state changes
             if let url = webView.url {
                 lastUrl = url.absoluteString
-                let comicId = Int(URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems?.first(where: { $0.name == "comic" })!.value ?? "1")!
+                let comicId = Int32(URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems?.first(where: { $0.name == "comic" })!.value ?? "1")!
                 comicIdFetcher(comicId)
             }
             webView.evaluateJavaScript("document.documentElement.outerHTML.toString()") { html, _ in

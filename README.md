@@ -5,9 +5,7 @@ thin ios wrapper app for Dinosaur Comics to extract and display all the alt text
 doesn't do anything fancy, just extracts the text so you don't have to. wraps the HTML as-is.
 
 TODOs include:
-* favorites (also cloud synced)
-    * key: comicId
-    * title: "alt 3" rss name of the comic
+* favorite browser UI
 * Look at MVVM tutorial here https://www.toptal.com/swift/static-patterns-swift-mvvm-tutorial
 * clone navigation buttons on sides in ipad wide view for touchscreen remote or bluetooth controller
 * Unit tests
@@ -16,4 +14,5 @@ TODOs include:
 * add a limit to how many history items are kept
 * Add some way to "reject" a remote state update, and get better control over when this happen
 * TV/Mac support for fun
+* update faves as CSV
 * try to debug cloudkit notification listener stuff in addition to timer-based world

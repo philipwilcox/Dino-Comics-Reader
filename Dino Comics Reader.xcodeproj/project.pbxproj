@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E909C08A2A44E66800E0EB9F /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E909C0892A44E66800E0EB9F /* WebView.swift */; };
-		E971C04E2A4E200B00CD897B /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E971C04D2A4E200B00CD897B /* ViewModel.swift */; };
+		E971C04E2A4E200B00CD897B /* ComicViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E971C04D2A4E200B00CD897B /* ComicViewModel.swift */; };
 		E9DA54782A44F2BA00009008 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = E9DA54772A44F2BA00009008 /* SwiftSoup */; };
 		E9DA547A2A4546EC00009008 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = E9DA54792A4546EB00009008 /* README.md */; };
 		E9E98C912A4366BE00DE72AD /* Dino_Comics_ReaderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E98C902A4366BE00DE72AD /* Dino_Comics_ReaderApp.swift */; };
@@ -42,7 +42,7 @@
 /* Begin PBXFileReference section */
 		E909C0892A44E66800E0EB9F /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		E971C04C2A4CE93900CD897B /* Dino-Comics-Reader-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Dino-Comics-Reader-Info.plist"; sourceTree = SOURCE_ROOT; };
-		E971C04D2A4E200B00CD897B /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
+		E971C04D2A4E200B00CD897B /* ComicViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicViewModel.swift; sourceTree = "<group>"; };
 		E9DA54792A4546EB00009008 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E9E98C8D2A4366BE00DE72AD /* Dino Comics Reader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Dino Comics Reader.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9E98C902A4366BE00DE72AD /* Dino_Comics_ReaderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dino_Comics_ReaderApp.swift; sourceTree = "<group>"; };
@@ -118,7 +118,7 @@
 				E9E98C942A4366BE00DE72AD /* Dino_Comics_Reader.xcdatamodeld */,
 				E9E98C9C2A4366C000DE72AD /* Preview Content */,
 				E909C0892A44E66800E0EB9F /* WebView.swift */,
-				E971C04D2A4E200B00CD897B /* ViewModel.swift */,
+				E971C04D2A4E200B00CD897B /* ComicViewModel.swift */,
 			);
 			path = "Dino Comics Reader";
 			sourceTree = "<group>";
@@ -289,7 +289,7 @@
 				E909C08A2A44E66800E0EB9F /* WebView.swift in Sources */,
 				E9E98C962A4366BE00DE72AD /* Dino_Comics_Reader.xcdatamodeld in Sources */,
 				E9E98C982A4366BE00DE72AD /* ContentView.swift in Sources */,
-				E971C04E2A4E200B00CD897B /* ViewModel.swift in Sources */,
+				E971C04E2A4E200B00CD897B /* ComicViewModel.swift in Sources */,
 				E9E98C932A4366BE00DE72AD /* Persistence.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
