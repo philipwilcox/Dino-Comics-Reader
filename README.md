@@ -14,5 +14,7 @@ TODOs include:
 * add a limit to how many history items are kept
 * Add some way to "reject" a remote state update, and get better control over when this happen
 * TV/Mac support for fun
+    * increase font size/zoom on Mac
+    * pad layout on Mac
 * update faves as CSV
 * try to debug cloudkit notification listener stuff in addition to timer-based world
