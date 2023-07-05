@@ -5,7 +5,6 @@
 //  Created by Philip Wilcox on 6/29/23.
 //
 import CloudKit
-import Combine
 import CoreData
 import SwiftUI
 
@@ -23,11 +22,29 @@ class ComicViewModel: ObservableObject {
 
     private var timer: Timer?
 
-    init(comicId: Int32, currentUrl: String, isFavorite: Bool, context: NSManagedObjectContext) {
+    init(context: NSManagedObjectContext) {
+        do {
+            let positionFetchRequest: NSFetchRequest<ComicIdHistory> = ComicIdHistory.fetchRequest()
+            positionFetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
+            positionFetchRequest.fetchLimit = 1
+            let lastItem = try context.fetch(positionFetchRequest).first
+            let comicId = Int32(lastItem?.id ?? 2801)
+            self.comicId = comicId
+            self.currentUrl = "https://qwantz.com/index.php?comic=\(comicId)"
+            print("Fetched comicId \(comicId) from store from record with timestamp \(String(describing: lastItem?.timestamp))")
+            let favoriteFetchRequest: NSFetchRequest<ComicFavorite> = ComicFavorite.fetchRequest()
+            favoriteFetchRequest.predicate = NSPredicate(format: "id == %@", NSNumber(value: comicId))
+            let favoriteResult = try context.fetch(favoriteFetchRequest)
+            self.isFavorite = !(favoriteResult.isEmpty)
+        } catch {
+            print("Failed to fetch ComicIdBackHistory: \(error)")
+            let comicId = Int32(2702)
+            self.comicId = comicId
+            self.currentUrl = "https://qwantz.com/index.php?comic=\(comicId)"
+            self.isFavorite = false
+        }
+
         self.context = context
-        self.comicId = comicId
-        self.currentUrl = currentUrl
-        self.isFavorite = isFavorite
         // dumb defaults for the following before we load the webview to fetch them since we don't store them in coredata state
         self.altText1 = ""
         self.altText2 = ""

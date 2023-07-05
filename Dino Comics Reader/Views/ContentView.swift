@@ -35,6 +35,8 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
+            // TODO: put URL on a top row on phone layouts
+            // TODO: add a "view favorites" button
             HStack {
                 Text(viewModel.currentUrl).padding(.leading).frame(alignment: .leading).textSelection(.enabled)
                 Spacer()
@@ -60,6 +62,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(viewModel: ComicViewModel(comicId: 2688, currentUrl: "https://qwantz.com/index.php?comic=2600", isFavorite: false, context: PersistenceController.preview.container.viewContext)).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        ContentView(viewModel: ComicViewModel(context: PersistenceController.preview.container.viewContext)).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
     }
 }
