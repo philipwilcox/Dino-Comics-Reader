@@ -36,7 +36,7 @@ struct ContentView: View {
     @ObservedObject var viewModel: ComicViewModel
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 // TODO: put URL on a top row on phone layouts
                 // TODO: add a "view favorites" button

@@ -51,7 +51,7 @@ class ComicViewModel: ObservableObject {
         self.altText3 = ""
 
         // TODO: set a second periodic timer? And for that one add an invalidation stopTimer() method that the View can hook into if it goes away
-        self.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false, block: { _ in
+        self.timer = Timer.scheduledTimer(withTimeInterval: 3, repeats: false, block: { _ in
             self.refresh()
         })
     }
