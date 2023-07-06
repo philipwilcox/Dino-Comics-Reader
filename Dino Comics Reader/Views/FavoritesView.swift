@@ -10,13 +10,16 @@ import SwiftUI
 struct FavoriteRow: View {
     var id: Int32
     var title: String
+    var deleteCallback: () -> Void
 
     var body: some View {
         HStack {
             Text(String(id))
             Spacer()
             Text(title)
-            // TODO: add delete button
+            Button(action: deleteCallback) {
+                Image(systemName: "minus.circle").foregroundColor(.red).padding(.leading, 2)
+            }
         }
     }
 }
@@ -27,9 +30,13 @@ struct FavoritesView: View {
     @ObservedObject var viewModel: FavoritesViewModel
 
     var body: some View {
-        List(viewModel.favorites, id: \.id) { favorite in
-            FavoriteRow(id: favorite.id, title: favorite.title ?? "[NONE]")
-        }
+        VStack {
+            List(viewModel.favorites, id: \.id) { favorite in
+                FavoriteRow(id: favorite.id, title: favorite.title ?? "[NONE]", deleteCallback: {
+                    viewModel.deleteFavorite(favorite: favorite)
+                })
+            }
+        }.navigationTitle("Favorites")
     }
 }
 
