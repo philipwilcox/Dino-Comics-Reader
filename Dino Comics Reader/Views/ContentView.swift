@@ -47,7 +47,7 @@ struct ContentView: View {
                     ComicIdFieldView(comicId: $viewModel.comicId, isFavorite: $viewModel.isFavorite, completionCallback: viewModel.navigateTo, clickCallback: viewModel.toggleFavorite).padding(.leading)
                     NavigationLink(destination: FavoritesView(viewModel: FavoritesViewModel(context: viewContext), navigationCallback: { id in
                         viewModel.navigateTo(newComicId: id)
-                    })) {
+                    }, currentComicId: $viewModel.comicId, currentIsFavorited: $viewModel.isFavorite)) {
                         Image(systemName: "bookmark.square")
                     }
                     // TODO: there's some sort of contraint violation here, learn to debug

@@ -30,6 +30,8 @@ struct FavoritesView: View {
 
     @ObservedObject var viewModel: FavoritesViewModel
     let navigationCallback: (Int32) -> Void
+    @Binding var currentComicId: Int32
+    @Binding var currentIsFavorited: Bool
 
     var body: some View {
         VStack {
@@ -39,6 +41,10 @@ struct FavoritesView: View {
                     dismiss()
                 }) {
                     FavoriteRow(id: favorite.id, title: favorite.title ?? "[NONE]", deleteCallback: {
+                        if currentIsFavorited, favorite.id == currentComicId {
+                            currentIsFavorited = false
+                        }
+                        // the data for favorite.id will only be usable for the equality check BEFORE we delete the favorite!
                         viewModel.deleteFavorite(favorite: favorite)
                     })
                 }
@@ -48,8 +54,11 @@ struct FavoritesView: View {
 }
 
 struct FavoritesView_Previews: PreviewProvider {
+    @State static var currentIsFavorite = false
+    @State static var currentComicId = Int32(2400)
+
     static var previews: some View {
         let viewModel = FavoritesViewModel(context: PersistenceController.preview.container.viewContext)
-        FavoritesView(viewModel: viewModel, navigationCallback: { _ in }).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        FavoritesView(viewModel: viewModel, navigationCallback: { _ in }, currentComicId: $currentComicId, currentIsFavorited: $currentIsFavorite).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
     }
 }
