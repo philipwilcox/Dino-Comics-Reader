@@ -184,23 +184,7 @@ class ComicViewModel: ObservableObject {
         updateFavoriteStatus()
     }
 
-    private func updateFavoriteStatus() {
-        let favoriteResult = getFavoriteRecords()
-        if favoriteResult.isEmpty {
-            isFavorite = false
-        } else {
-            isFavorite = true
-        }
-    }
-
-    private func getFavoriteRecords() -> [ComicFavorite] {
-        let fetchRequest: NSFetchRequest<ComicFavorite> = ComicFavorite.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id == %@", NSNumber(value: comicId))
-        let r = try! context.fetch(fetchRequest)
-        return r
-    }
-
-    private func refresh() {
+    func refresh() {
         print("Refreshing current comic status")
         // We're gonna check if our backing data in CloudKit has changed 5s after app start to see if we need to update our location
         let fetchRequest = createBackFetchRequest(limit: 1)
@@ -218,6 +202,22 @@ class ComicViewModel: ObservableObject {
         }
         updateFavoriteStatus()
         showMostRecentHistory(limit: 10, desc: "from refresh")
+    }
+
+    private func updateFavoriteStatus() {
+        let favoriteResult = getFavoriteRecords()
+        if favoriteResult.isEmpty {
+            isFavorite = false
+        } else {
+            isFavorite = true
+        }
+    }
+
+    private func getFavoriteRecords() -> [ComicFavorite] {
+        let fetchRequest: NSFetchRequest<ComicFavorite> = ComicFavorite.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", NSNumber(value: comicId))
+        let r = try! context.fetch(fetchRequest)
+        return r
     }
 
     @objc func willEnterForeground() {

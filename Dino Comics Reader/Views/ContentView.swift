@@ -52,6 +52,10 @@ struct ContentView: View {
                     }
                     // TODO: there's some sort of contraint violation here, learn to debug
                     Spacer()
+                    // Note that the refresh button can't be properly tested on simulator since simulator doesn't get background cloudkit updates
+                    Button(action: viewModel.refresh, label: {
+                        Image(systemName: "arrow.clockwise.icloud.fill")
+                    })
                     Button(action: viewModel.navigateBack, label: { Image(systemName: "arrowshape.backward.fill") })
                     Button(action: viewModel.navigateForward, label: { Image(systemName: "arrowshape.forward.fill") }).padding(.trailing)
                 }
