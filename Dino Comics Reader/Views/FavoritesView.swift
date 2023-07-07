@@ -19,7 +19,7 @@ struct FavoriteRow: View {
             Text(title)
             Button(action: deleteCallback) {
                 Image(systemName: "minus.circle").foregroundColor(.red).padding(.leading, 2)
-            }
+            }.buttonStyle(BorderlessButtonStyle())
         }
     }
 }
