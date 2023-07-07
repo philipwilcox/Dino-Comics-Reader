@@ -50,10 +50,12 @@ class ComicViewModel: ObservableObject {
         self.altText2 = ""
         self.altText3 = ""
 
-        // TODO: set a second periodic timer? And for that one add an invalidation stopTimer() method that the View can hook into if it goes away
-        self.timer = Timer.scheduledTimer(withTimeInterval: 3, repeats: false, block: { _ in
-            self.refresh()
-        })
+        // Set up to refresh a few seconds after foregrounding automatically
+        NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground), name: UIScene.willEnterForegroundNotification, object: nil)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     // TODO: is there a better way to do a navigation history stack?
@@ -199,6 +201,7 @@ class ComicViewModel: ObservableObject {
     }
 
     private func refresh() {
+        print("Refreshing current comic status")
         // We're gonna check if our backing data in CloudKit has changed 5s after app start to see if we need to update our location
         let fetchRequest = createBackFetchRequest(limit: 1)
         let lastBackItem = try? context.fetch(fetchRequest)
@@ -209,10 +212,20 @@ class ComicViewModel: ObservableObject {
                 print("Updating current comic from refreshed state to \(newComicId) from \(comicId)")
                 comicId = newComicId
                 currentUrl = "https://qwantz.com/index.php?comic=\(newComicId)"
+            } else {
+                print("Not refreshing since \(newComicId) didn't change from my last one of \(comicId)")
             }
         }
         updateFavoriteStatus()
         showMostRecentHistory(limit: 10, desc: "from refresh")
+    }
+
+    @objc func willEnterForeground() {
+        // TODO: look at - https://stackoverflow.com/posts/63424212/revisions - for ways to make this turn into an interactive "refresh or decline" option?
+        print("HI, will enter foreground at time \(Date())")
+        timer = Timer.scheduledTimer(withTimeInterval: 2, repeats: false, block: { _ in
+            self.refresh()
+        })
     }
 
     private func createBackFetchRequest(limit: Int) -> NSFetchRequest<ComicIdHistory> {
@@ -223,20 +236,20 @@ class ComicViewModel: ObservableObject {
     }
 
     private func showMostRecentHistory(limit: Int, desc: String) {
-        let backFetchRequest = createBackFetchRequest(limit: limit)
-        let lastBackItems = try? context.fetch(backFetchRequest)
-        lastBackItems?.forEach {
-            h in
-            print("\(desc) Back item \(h.id) from \(h.timestamp)")
-        }
-
-        let forwardFetchRequest: NSFetchRequest<ComicIdForwardHistory> = ComicIdForwardHistory.fetchRequest()
-        forwardFetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
-        forwardFetchRequest.fetchLimit = limit
-        let lastForwardItems = try? context.fetch(forwardFetchRequest)
-        lastForwardItems?.forEach {
-            h in
-            print("\(desc) Forward item \(h.id) from \(h.timestamp)")
-        }
+//        let backFetchRequest = createBackFetchRequest(limit: limit)
+//        let lastBackItems = try? context.fetch(backFetchRequest)
+//        lastBackItems?.forEach {
+//            h in
+//            print("\(desc) Back item \(h.id) from \(h.timestamp)")
+//        }
+//
+//        let forwardFetchRequest: NSFetchRequest<ComicIdForwardHistory> = ComicIdForwardHistory.fetchRequest()
+//        forwardFetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
+//        forwardFetchRequest.fetchLimit = limit
+//        let lastForwardItems = try? context.fetch(forwardFetchRequest)
+//        lastForwardItems?.forEach {
+//            h in
+//            print("\(desc) Forward item \(h.id) from \(h.timestamp)")
+//        }
     }
 }
