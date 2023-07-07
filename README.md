@@ -5,7 +5,6 @@ thin ios wrapper app for Dinosaur Comics to extract and display all the alt text
 doesn't do anything fancy, just extracts the text so you don't have to. wraps the HTML as-is.
 
 TODOs include:
-* From favorite browser, how do I navigate back to a different comic!
 * Look at MVVM tutorial here https://www.toptal.com/swift/static-patterns-swift-mvvm-tutorial
 * clone navigation buttons on sides in ipad wide view for touchscreen remote or bluetooth controller
 * Unit tests

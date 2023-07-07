@@ -7,6 +7,7 @@
 
 import CoreData
 import Foundation
+import SwiftUI
 
 class FavoritesViewModel: ObservableObject {
     @Published var favorites: [ComicFavorite]
