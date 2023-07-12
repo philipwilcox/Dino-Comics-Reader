@@ -58,7 +58,8 @@ struct WebView: UIViewRepresentable {
                     let comic = try! doc.select("img.comic").first()!
                     let alt1 = try! comic.attr("title")
                     let contactString = try! doc.select("a:contains(contact)").first()!.attr("href")
-                    let alt2 = URLComponents(string: contactString)!.queryItems!.first(where: { $0.name == "subject" })!.value!
+                    // Note that we just split on "subject=" here instead of using a URL parser because sometimes there are characters in this like '#' that would be parsed as other components of a URL; we just want the whole thing
+                    let alt2 = String(contactString.split(separator: "subject=", maxSplits: 1)[1])
                     let commentElement = try! doc.select("body").first()?.getChildNodes().first(where: { $0.nodeName() == "#comment" })! as! Comment
                     // if we ever had to find the right one from multiple comments instead of just the first, we could match on "<span class="rss-title">" in the comment
                     let alt3 = try! SwiftSoup.parse(commentElement.getData()).select("span").first()!.text()
